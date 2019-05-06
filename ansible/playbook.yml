@@ -1,0 +1,7 @@
+---
+- name: Nifi Installation
+  become: true
+  hosts: all
+  roles:
+    - base
+    - nifi

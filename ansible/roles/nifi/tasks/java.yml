@@ -1,0 +1,21 @@
+---
+- name: Java | Verify if Java is installed
+  stat:
+    path: "{{ java_home }}"
+  register: java_home_path
+
+- name: Java | Install
+  yum:
+    name: "java-{{ java_version }}-openjdk-devel"
+    state: present
+  when: java_home_path.stat.exists == False
+
+- name: Java | Define variable environment
+  lineinfile:
+    path: "{{ item.path }}"
+    line: "{{ item.line }}"
+  with_items:
+    - {path: "/etc/environment", line: "JAVA_HOME={{ java_home }}"}
+    - {path: "/home/vagrant/.bash_profile", line: "export JAVA_HOME={{ java_home }}"}
+    - {path: "/home/vagrant/.bash_profile", line: "PATH=$PATH:$JAVA_HOME/bin"}
+  when: java_home_path.stat.exists == False

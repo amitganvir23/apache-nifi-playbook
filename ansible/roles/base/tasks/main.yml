@@ -1,0 +1,10 @@
+---
+- name: Base | Install required apps
+  yum:
+    name: ['vim', 'bzip2', 'unzip', 'rsync', 'wget', 'net-tools']
+    state: latest
+
+- name: Base | Disable IPV6
+  template:
+    src: sysctl.conf.j2
+    dest: /etc/sysctl.conf

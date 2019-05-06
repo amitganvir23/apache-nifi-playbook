@@ -1,0 +1,60 @@
+---
+- name: Apache Nifi | Install Java
+  include_tasks: java.yml
+
+- name: Apache Nifi | Verify if installed
+  stat:
+    path: "{{ nifi_home }}"
+  register: nifi_home_path
+
+- name: Apache Nifi | Download package
+  get_url:
+    url: "{{ nifi_mirror_url }}"
+    dest: "{{ nifi_tempdir }}/{{ nifi_package }}"
+  when: nifi_home_path.stat.exists == False
+
+- name: Apache Nifi | Extract package
+  unarchive:
+    src: "{{ nifi_tempdir }}/{{ nifi_package }}"
+    dest: "{{ nifi_root }}"
+    remote_src: yes
+  when: nifi_home_path.stat.exists == False
+
+- name: Apache Nifi | Remove downloaded package
+  file:
+    path: "{{ nifi_tempdir }}/{{ nifi_package }}"
+    state: absent
+  when: nifi_home_path.stat.exists == False
+
+- name: Apache Nifi | Change ownership
+  file:
+    path: "{{ nifi_root }}/{{ nifi_dir }}"
+    owner: vagrant
+    group: vagrant
+    recurse: true
+
+- name: Apache Nifi | Create symbolic link
+  file:
+    src: "{{ nifi_root }}/{{ nifi_dir }}"
+    dest: "{{ nifi_home }}"
+    state: link
+  when: nifi_home_path.stat.exists == False
+
+- name: Apache Nifi | Define variable environment
+  lineinfile:
+    path: "{{ item.path }}"
+    line: "{{ item.line }}"
+  with_items:
+    - {path: "/home/vagrant/.bash_profile", line: "export NIFI_HOME={{ nifi_home }}"}
+    - {path: "/home/vagrant/.bash_profile", line: "PATH=$PATH:$NIFI_HOME/bin"}
+    - {path: "/home/vagrant/.bash_profile", line: "export PATH"}
+  when: nifi_home_path.stat.exists == False
+
+- name: Apache Nifi | Install service
+  command: /opt/nifi/bin/nifi.sh install
+
+- name: Apache Nifi | Start service
+  service:
+    name: nifi
+    state: started
+    enabled: yes

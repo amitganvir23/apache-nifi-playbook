@@ -1,0 +1,13 @@
+---
+# Java
+java_version: 1.8.0
+java_home: /usr/lib/jvm/java-{{ java_version }}
+
+# Apache Nifi
+nifi_version: 1.9.2
+nifi_mirror_url: https://www-us.apache.org/dist/nifi/{{ nifi_version }}/{{ nifi_package }}
+nifi_package: nifi-{{ nifi_version }}-bin.tar.gz
+nifi_dir: nifi-{{ nifi_version }}
+nifi_tempdir: /tmp
+nifi_root: /usr/local
+nifi_home: /opt/nifi
